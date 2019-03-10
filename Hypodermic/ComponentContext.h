@@ -6,6 +6,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 #include "Hypodermic/AutowireableConstructor.h"
+#include "Hypodermic/Behavior.h"
 #include "Hypodermic/ConstructorDescriptor.h"
 #include "Hypodermic/IRegistration.h"
 #include "Hypodermic/IRegistrationScope.h"
@@ -14,6 +15,7 @@
 #include "Hypodermic/IsComplete.h"
 #include "Hypodermic/NestedRegistrationScope.h"
 #include "Hypodermic/ResolutionContext.h"
+#include "Hypodermic/ResolutionException.h"
 #include "Hypodermic/TypeInfo.h"
 
 
@@ -79,9 +81,7 @@ namespace Hypodermic
             return resolve< T >(createKeyForNamedType< T >(name));
         }
 
-    private:
-        template <class T>
-        std::shared_ptr< T > resolve(const TypeAliasKey& typeAliasKey)
+        std::shared_ptr< void > resolveErasedType(const TypeAliasKey& typeAliasKey)
         {
             std::vector< std::shared_ptr< RegistrationContext > > registrationContexts;
             if (!tryGetRegistrations(typeAliasKey, registrationContexts))
@@ -93,17 +93,29 @@ namespace Hypodermic
             for (auto&& registrationContext : boost::adaptors::reverse(registrationContexts))
             {
                 if (!registrationContext->registration()->isFallback())
-                    return resolve< T >(typeAliasKey, registrationContext);
+                    return resolveErasedType(typeAliasKey, registrationContext);
             }
 
-            return resolve< T >(typeAliasKey, registrationContexts.back());
+            return resolveErasedType(typeAliasKey, registrationContexts.back());
+        }
+
+    private:
+        template <class T>
+        std::shared_ptr< T > resolve(const TypeAliasKey& typeAliasKey)
+        {
+            return std::static_pointer_cast< T >(resolveErasedType(typeAliasKey));
         }
 
         template <class T>
         std::shared_ptr< T > resolve(const TypeAliasKey& typeAliasKey, const std::shared_ptr< RegistrationContext >& registrationContext)
         {
+            return std::static_pointer_cast< T >(resolveErasedType(typeAliasKey, registrationContext));
+        }
+
+        std::shared_ptr< void > resolveErasedType(const TypeAliasKey& typeAliasKey, const std::shared_ptr< RegistrationContext >& registrationContext)
+        {
             auto& resolutionContainer = registrationContext->resolutionContainer();
-            return std::static_pointer_cast< T >(resolutionContainer.getOrCreateComponent(typeAliasKey, registrationContext->registration(), m_resolutionContext));
+            return resolutionContainer.getOrCreateComponent(typeAliasKey, registrationContext->registration(), m_resolutionContext);
         }
 
         template <class T>
@@ -135,8 +147,8 @@ namespace Hypodermic
         template <class T>
         std::shared_ptr< T > resolveIfTypeCanBeRegistered()
         {
-            if (!tryToRegisterType< T >(*m_registrationScope, Traits::HasAutowireableConstructor< T >()))
-                return nullptr;
+            if (!Behavior::isRuntimeRegistrationEnabled() || !tryToRegisterType< T >(*m_registrationScope, Traits::HasAutowireableConstructor< T >()))
+                HYPODERMIC_THROW_RESOLUTION_EXCEPTION("Unable to resolve " << Utils::getMetaTypeInfo< T >().fullyQualifiedName());
 
             return resolve< T >(createKeyForType< T >());
         }

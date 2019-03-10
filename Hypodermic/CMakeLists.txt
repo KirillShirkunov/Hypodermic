@@ -17,6 +17,7 @@ set(Hypodermic_headers
     AsSelf.h
     AutowireableConstructor.h
     AutowireableConstructorRegistrationDescriptor.h
+    Behavior.h
     CircularDependencyException.h
     ComponentContext.h
     Config.h
@@ -42,6 +43,7 @@ set(Hypodermic_headers
     IRegistration.h
     IRegistrationActivator.h
     IRegistrationDescriptor.h
+    IRegistrationRegistry.h
     IRegistrationScope.h
     IResolutionContainer.h
     IResolutionContext.h
@@ -85,6 +87,7 @@ set(Hypodermic_headers
     RegistrationScope.h
     ResolutionContainer.h
     ResolutionContext.h
+    ResolutionException.h
     ResolutionInfo.h
     RuntimeRegistrationBuilder.h
     SingleInstance.h

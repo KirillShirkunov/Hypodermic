@@ -14,7 +14,7 @@ namespace Testing
     class DefaultConstructibleBase
     {
     public:
-        virtual ~DefaultConstructibleBase() {}
+        virtual ~DefaultConstructibleBase() = default;
 
         virtual void doSomething() = 0;
     };
@@ -44,8 +44,6 @@ namespace Testing
         explicit ContainerDependent(const std::shared_ptr< Container >& container)
             : container(container)
         {
-            if (this->container == nullptr)
-                throw std::runtime_error("container cannot be null");
         }
 
         std::shared_ptr< Container > container;
@@ -74,8 +72,6 @@ namespace Testing
         explicit MissingConstructor(const std::shared_ptr< MissingConstructorDependency >& dependency)
             : dependency(dependency)
         {
-            if (this->dependency == nullptr)
-                throw std::runtime_error("dependency cannot be null");
         }
 
         std::shared_ptr< MissingConstructorDependency > dependency;
@@ -86,7 +82,7 @@ namespace Testing
     class ProvidedDependencyBase
     {
     public:
-        virtual ~ProvidedDependencyBase() {}
+        virtual ~ProvidedDependencyBase() = default;
 
         virtual void doSomething() = 0;
     };
@@ -100,7 +96,7 @@ namespace Testing
     class RandomTypeBase
     {
     public:
-        virtual ~RandomTypeBase() {}
+        virtual ~RandomTypeBase() = default;
     };
 
     class TypeWithOneDependency : public RandomTypeBase
@@ -109,8 +105,6 @@ namespace Testing
         explicit TypeWithOneDependency(const std::shared_ptr< ProvidedDependencyBase >& dependency)
             : dependency(dependency)
         {
-            if (this->dependency == nullptr)
-                throw std::runtime_error("dependency cannot be null");
         }
 
         std::shared_ptr< ProvidedDependencyBase > dependency;
@@ -143,13 +137,13 @@ namespace Testing
     class BaseType1
     {
     public:
-        virtual ~BaseType1() {}
+        virtual ~BaseType1() = default;
     };
 
     class BaseType2
     {
     public:
-        virtual ~BaseType2() {}
+        virtual ~BaseType2() = default;
     };
 
     class Type1 : public BaseType1
@@ -172,7 +166,7 @@ namespace Testing
     class ILoader
     {
     public:
-        virtual ~ILoader() {}
+        virtual ~ILoader() = default;
 
         virtual void load() = 0;
     };
@@ -190,8 +184,6 @@ namespace Testing
         explicit TypeThatNeedsLoader(const std::shared_ptr< ILoader >& dependency)
             : dependency(dependency)
         {
-            if (this->dependency == nullptr)
-                throw std::runtime_error("dependency cannot be null");
         }
 
         std::shared_ptr< ILoader > dependency;
@@ -204,8 +196,6 @@ namespace Testing
         explicit Initializer(const std::shared_ptr< TypeThatNeedsLoader >& dependency)
             : dependency(dependency)
         {
-            if (this->dependency == nullptr)
-                throw std::runtime_error("dependency cannot be null");
         }
 
         std::shared_ptr< TypeThatNeedsLoader > dependency;

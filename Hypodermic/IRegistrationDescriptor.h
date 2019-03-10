@@ -10,7 +10,7 @@ namespace Hypodermic
 {
 
     class IRegistrationDescriptor;
-    class IRegistrationScope;
+    class IRegistrationRegistry;
 
     struct TypeInfo;
 
@@ -21,11 +21,11 @@ namespace Hypodermic
         typedef boost::signals2::signal< void(const std::shared_ptr< IRegistrationDescriptor >&) > Updated;
 
     public:
-        virtual ~IRegistrationDescriptor() {}
+        virtual ~IRegistrationDescriptor() = default;
 
         virtual Updated& registrationDescriptorUpdated() const = 0;
 
-        virtual std::function< void(IRegistrationScope&) > getDescriptionFactory() const = 0;
+        virtual std::function< void(IRegistrationRegistry&) > getDescriptionFactory() const = 0;
 
         virtual const TypeInfo& instanceType() const = 0;
     };
